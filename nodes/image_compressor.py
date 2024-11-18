@@ -141,7 +141,6 @@ class ImageCompressorNode:
         filename = f"{output_prefix}{timestamp}_{self.counter:04d}.{format.lower()}"
         save_path = os.path.join(self.output_dir, filename)
         
-        # 如果需要保存图片
         if save_image:
             # 保存压缩后的图片到文件
             with open(save_path, 'wb') as f:
@@ -149,9 +148,24 @@ class ImageCompressorNode:
                 f.write(buffer.getvalue())
             self.counter += 1
             save_path_str = f"已保存到: {save_path}"
+            
+            # 只在保存图片时添加预览信息
+            ui_info = {
+                "ui": {
+                    "images": [
+                        {
+                            "filename": filename,
+                            "subfolder": self.output_dir,
+                            "type": 'output'
+                        }
+                    ]
+                }
+            }
         else:
             save_path_str = "未保存文件"
-        
+            # 不保存时不显示预览
+            ui_info = {"ui": {"images": []}}
+
         # 从压缩后的数据创建新的图像
         buffer.seek(0)
         compressed_img = Image.open(buffer)
@@ -175,4 +189,7 @@ class ImageCompressorNode:
         result = torch.from_numpy(compressed_array).to(image.device)
         
         # 返回压缩后的图像和信息
-        return (result, size_str, original_size_str, save_path_str)
+        return {
+            "result": (result, size_str, original_size_str, save_path_str),
+            **ui_info
+        }
