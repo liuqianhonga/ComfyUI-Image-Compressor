@@ -2,6 +2,8 @@
 
 一个用于图像压缩的ComfyUI自定义节点，支持多种压缩格式和参数调整。
 
+![image](workflow/screenshot.png)
+
 ## 功能特点
 
 - 支持多种图像格式（PNG、WEBP、JPEG）的压缩
