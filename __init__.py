@@ -5,5 +5,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "ImageCompressor": "图片压缩器"
+    "ImageCompressor": "Image Compressor"
 }

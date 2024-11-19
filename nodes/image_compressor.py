@@ -147,7 +147,7 @@ class ImageCompressorNode:
                 buffer.seek(0)
                 f.write(buffer.getvalue())
             self.counter += 1
-            save_path_str = f"已保存到: {save_path}"
+            save_path_str = f"Saved to: {save_path}"
             
             # 只在保存图片时添加预览信息
             ui_info = {
@@ -162,7 +162,7 @@ class ImageCompressorNode:
                 }
             }
         else:
-            save_path_str = "未保存文件"
+            save_path_str = "File not saved"
             # 不保存时不显示预览
             ui_info = {"ui": {"images": []}}
 
