@@ -1,5 +1,7 @@
 # ComfyUI Image Compressor Node
 
+[English](README_en.md) | 中文
+
 一个用于图像压缩的ComfyUI自定义节点，支持多种压缩格式和参数调整。
 
 ![image](workflow/screenshot.png)
@@ -16,7 +18,7 @@
 
 1. 将本插件复制到 ComfyUI 的 `custom_nodes` 目录下
 2. 重启 ComfyUI
-3. 在节点列表中找到 "图片压缩器"
+3. 在节点列表中找到 "Image Compressor"
 
 ## 参数说明
 
