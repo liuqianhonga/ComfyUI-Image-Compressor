@@ -20,7 +20,6 @@ class ImageCompressorNode:
         return {
             "required": {
                 "image": ("IMAGE",),
-                
                 "format": (["PNG", "WEBP", "JPEG"],),
                 "quality": ("INT", {
                     "default": 85,
@@ -63,132 +62,110 @@ class ImageCompressorNode:
 
     def compress_image(self, image, format, quality, resize_factor, compression_level,
                       save_image, output_prefix, output_path=""):
-        # 设置输出路径
-        if output_path:
-            self.output_dir = output_path
-        else:
-            self.output_dir = os.path.join(self.base_output_dir, 'compressed')
-            
+        self.output_dir = output_path or os.path.join(self.base_output_dir, 'compressed')
         os.makedirs(self.output_dir, exist_ok=True)
         
-        # 确保输入是 torch.Tensor
+        # 确保输入是 torch.Tensor 并转换为 numpy
         if not isinstance(image, torch.Tensor):
             image = torch.from_numpy(image)
-        
-        # 将 Tensor 转换为 numpy 进行处理
         input_image = image.cpu().numpy()
         
-        # 确保是3D格式 (H, W, C)
-        if len(input_image.shape) == 4:
+        # 处理特殊的 (1, 1, C) 形状
+        if len(input_image.shape) == 3 and input_image.shape[0] == 1 and input_image.shape[1] == 1:
+            channels = input_image.shape[2]
+            side_length = int(np.sqrt(channels / 4)) if channels % 4 == 0 else int(np.sqrt(channels / 3))
+            target_channels = 4 if channels % 4 == 0 else 3
+            if channels % target_channels != 0:
+                side_length = int(channels / target_channels) + 1
+            
+            new_image = np.zeros((side_length, side_length, target_channels), dtype=np.float32)
+            flat_data = input_image[0, 0, :channels-(channels % target_channels)].reshape(-1, target_channels)
+            new_image[:flat_data.shape[0]//side_length, :side_length] = flat_data.reshape(-1, side_length, target_channels)
+            input_image = new_image
+        elif len(input_image.shape) == 4:
             input_image = input_image[0]
         
-        # 调整通道顺序，确保是RGB格式
-        if input_image.shape[-1] != 3:
-            input_image = np.transpose(input_image, (1, 2, 0))
+        # 调整通道顺序和值域
+        if len(input_image.shape) == 3 and input_image.shape[-1] not in [3, 4]:
+            if input_image.shape[0] in [3, 4]:
+                input_image = np.transpose(input_image, (1, 2, 0))
         
-        # 将numpy数组转换为PIL图像
-        img = Image.fromarray((input_image * 255).astype(np.uint8))
+        if input_image.max() > 1.0:
+            input_image = input_image / 255.0
         
-        # 获取原始图像大小
+        # 转换为PIL图像
+        img = Image.fromarray((input_image * 255).astype(np.uint8), 
+                            'RGBA' if input_image.shape[-1] == 4 else 'RGB')
+        
+        # 获取原始大小
         original_buffer = io.BytesIO()
         img.save(original_buffer, format='PNG')
         original_size = original_buffer.tell()
-        if original_size >= 1024 * 1024:
-            original_size_str = f"{original_size / (1024 * 1024):.2f}MB"
-        else:
-            original_size_str = f"{original_size / 1024:.2f}KB"
+        original_size_str = f"{original_size / (1024 * 1024):.2f}MB" if original_size >= 1024 * 1024 else f"{original_size / 1024:.2f}KB"
 
-        # 如果需要调整尺寸
+        # 调整尺寸
         if resize_factor < 1.0:
             new_size = tuple(int(dim * resize_factor) for dim in img.size)
             img = img.resize(new_size, Image.Resampling.LANCZOS)
         
-        # 保存到内存缓冲区并压缩
-        buffer = io.BytesIO()
-        
-        # 根据不同格式优化保存参数
+        # 设置保存选项
         save_options = {}
         if format == "PNG":
-            save_options.update({
-                'optimize': True,
-                'compression_level': compression_level
-            })
+            save_options.update({'optimize': True, 'compression_level': compression_level})
         elif format == "JPEG":
-            save_options.update({
-                'quality': quality,
-                'optimize': True,
-                'subsampling': 1
-            })
+            if img.mode == 'RGBA':
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                background.paste(img, mask=img.split()[3])
+                img = background
+            save_options.update({'quality': quality, 'optimize': True, 'subsampling': 1})
         elif format == "WEBP":
-            save_options.update({
-                'quality': quality,
-                'method': 6,
-                'lossless': False
-            })
+            save_options.update({'quality': quality, 'method': 6, 'lossless': False, 'alpha_quality': quality})
         
-        # 保存压缩后的图像
+        # 压缩并保存
+        buffer = io.BytesIO()
         img.save(buffer, format=format, **save_options)
-        
-        # 获取压缩后的文件大小
         compressed_size = buffer.tell()
-        if compressed_size >= 1024 * 1024:
-            size_str = f"{compressed_size / (1024 * 1024):.2f}MB"
-        else:
-            size_str = f"{compressed_size / 1024:.2f}KB"
+        size_str = f"{compressed_size / (1024 * 1024):.2f}MB" if compressed_size >= 1024 * 1024 else f"{compressed_size / 1024:.2f}KB"
         
-        # 生成输出文件名
+        # 处理文件保存和UI信息
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{output_prefix}{timestamp}_{self.counter:04d}.{format.lower()}"
         save_path = os.path.join(self.output_dir, filename)
         
         if save_image:
-            # 保存压缩后的图片到文件
             with open(save_path, 'wb') as f:
                 buffer.seek(0)
                 f.write(buffer.getvalue())
             self.counter += 1
             save_path_str = f"Saved to: {save_path}"
-            
-            # 只在保存图片时添加预览信息
-            ui_info = {
-                "ui": {
-                    "images": [
-                        {
-                            "filename": filename,
-                            "subfolder": self.output_dir,
-                            "type": 'output'
-                        }
-                    ]
-                }
-            }
+            ui_info = {"ui": {"images": [{"filename": filename, "subfolder": self.output_dir, "type": 'output'}]}}
         else:
             save_path_str = "File not saved"
-            # 不保存时不显示预览
             ui_info = {"ui": {"images": []}}
 
-        # 从压缩后的数据创建新的图像
+        # 处理压缩后的图像
         buffer.seek(0)
         compressed_img = Image.open(buffer)
+        if format == "JPEG":
+            compressed_array = np.array(compressed_img).astype(np.float32) / 255.0
+        else:
+            if compressed_img.mode == 'RGBA':
+                compressed_array = np.array(compressed_img).astype(np.float32) / 255.0
+            else:
+                if input_image.shape[-1] == 4:
+                    rgb_img = compressed_img.convert('RGB')
+                    compressed_array = np.array(rgb_img).astype(np.float32) / 255.0
+                else:
+                    compressed_array = np.array(compressed_img.convert('RGB')).astype(np.float32) / 255.0
+                    if len(compressed_array.shape) == 2:
+                        compressed_array = np.stack([compressed_array] * 3, axis=-1)
         
-        # 如果是JPEG格式，转换为RGB（避免RGBA问题）
-        if format == "JPEG" and compressed_img.mode != 'RGB':
-            compressed_img = compressed_img.convert('RGB')
-        
-        # 转换为numpy数组
-        compressed_array = np.array(compressed_img).astype(np.float32) / 255.0
-        
-        # 确保格式正确
-        if len(compressed_array.shape) == 2:
-            compressed_array = np.stack([compressed_array] * 3, axis=-1)
-        
-        # 转换回原始格式
+        # 确保输出格式正确
         if len(image.shape) == 4:
             compressed_array = np.expand_dims(compressed_array, 0)
         
-        # 转换为tensor并返回压缩后的图像
         result = torch.from_numpy(compressed_array).to(image.device)
         
-        # 返回压缩后的图像和信息
         return {
             "result": (result, size_str, original_size_str, save_path_str),
             **ui_info
