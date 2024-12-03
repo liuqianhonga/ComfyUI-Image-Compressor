@@ -6,6 +6,8 @@ A ComfyUI custom node for image compression, supporting multiple formats and adj
 
 ![image](workflow/screenshot.png)
 
+> Drag and drop directly into ComfyUI
+
 ## Features
 
 - Support multiple image formats (PNG, WEBP, JPEG)
@@ -18,18 +20,42 @@ A ComfyUI custom node for image compression, supporting multiple formats and adj
 
 1. Copy this plugin to ComfyUI's `custom_nodes` directory
 2. Restart ComfyUI
-3. Find "Image Compressor" in the node list
+3. Find compression nodes in the node list:
+   - Path: image/processing/Image Compressor (Single image compression node)
+   - Path: image/processing/Batch Image Compressor (Batch compression node)
 
-## Parameter Description
+## Node Types
 
-### Basic Parameters
+### Image Compressor Node
 
+#### Input Parameters
 - **image**: Input image
 - **save_image**: Whether to save the compressed image file (Default: Yes)
 - **output_prefix**: Output filename prefix (Default: compressed_)
 - **output_path**: Custom output path (Optional, defaults to ComfyUI's output/compressed directory)
 
-### Compression Parameters
+#### Output Information
+- Compressed image
+- Compressed file size
+- Original file size
+- Save path (if saving is enabled)
+
+### Batch Image Compressor Node
+
+#### Input Parameters
+- **input_path**: Input image directory path
+  - Processes all image files in the directory
+  - Automatically recognizes PNG, JPEG, WEBP formats
+  - Recursively processes images in subdirectories
+- **save_image**: Whether to save the compressed image files (Default: Yes)
+- **output_prefix**: Output filename prefix (Default: compressed_)
+- **output_path**: Custom output path (Optional)
+
+#### Output Information
+- Processing result summary, including status for each file
+- Output directory path
+
+### Common Compression Parameters
 
 #### Format Selection (format)
 - **PNG**: Lossless compression, suitable for scenarios requiring image quality preservation
@@ -86,16 +112,8 @@ A ComfyUI custom node for image compression, supporting multiple formats and adj
    - If still too large, consider adjusting resize_factor
    - Finally consider changing compression format
 
-## Output Information
-
-The node returns:
-- Compressed image
-- Compressed file size
-- Original file size
-- Save path (if saving is enabled)
-
 ## Notes
 
 - Output directory is created automatically
 - Filenames include timestamp and counter to avoid overwriting existing files
-- Recommend selecting appropriate compression parameters based on specific use cases 
+- Recommend selecting appropriate compression parameters based on specific use cases

@@ -5,6 +5,7 @@
 一个用于图像压缩的ComfyUI自定义节点，支持多种压缩格式和参数调整。
 
 ![image](workflow/screenshot.png)
+> 直接拖入ComfyUI
 
 ## 功能特点
 
@@ -18,18 +19,42 @@
 
 1. 将本插件复制到 ComfyUI 的 `custom_nodes` 目录下
 2. 重启 ComfyUI
-3. 在节点列表中找到 "Image Compressor"
+3. 在节点列表中找到压缩节点:
+   - 路径: image/processing/Image Compressor (单图压缩节点)
+   - 路径: image/processing/Batch Image Compressor (批量压缩节点)
 
-## 参数说明
+## 节点类型
 
-### 基本参数
+### 单图压缩节点 (Image Compressor)
 
+#### 输入参数
 - **image**: 输入图像
 - **save_image**: 是否保存压缩后的图像文件（默认：是）
 - **output_prefix**: 输出文件名前缀（默认：compressed_）
 - **output_path**: 自定义输出路径（可选，默认使用 ComfyUI 的 output/compressed 目录）
 
-### 压缩参数
+#### 输出信息
+- 压缩后的图像
+- 压缩后的文件大小
+- 原始文件大小
+- 保存路径（如果启用了保存）
+
+### 批量压缩节点 (Batch Image Compressor)
+
+#### 输入参数
+- **input_path**: 输入图像目录路径
+  - 支持处理目录下的所有图像文件
+  - 自动识别 PNG、JPEG、WEBP 格式
+  - 会递归处理子目录中的图像
+- **save_image**: 是否保存压缩后的图像文件（默认：是）
+- **output_prefix**: 输出文件名前缀（默认：compressed_）
+- **output_path**: 自定义输出路径（可选）
+
+#### 输出信息
+- 处理结果摘要，包含每个文件的处理状态
+- 输出目录路径
+
+### 通用压缩参数
 
 #### 格式选择 (format)
 - **PNG**: 无损压缩，适合需要保持图像质量的场景
@@ -86,16 +111,8 @@
    - 如果仍然太大，可以考虑调整 resize_factor
    - 最后考虑更换压缩格式
 
-## 输出信息
-
-节点会返回以下信息：
-- 压缩后的图像
-- 压缩后的文件大小
-- 原始文件大小
-- 保存路径（如果启用了保存）
-
 ## 注意事项
 
 - 输出目录会自动创建
 - 文件名包含时间戳和计数器，确保不会覆盖已有文件
-- 建议根据具体使用场景选择合适的压缩参数 
+- 建议根据具体使用场景选择合适的压缩参数
