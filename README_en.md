@@ -4,7 +4,7 @@ English | [中文](README.md)
 
 A ComfyUI custom node for image compression, supporting multiple formats and adjustable parameters.
 
-![image](workflow/screenshot.png)
+![image](workflow.png)
 
 > Drag and drop directly into ComfyUI
 

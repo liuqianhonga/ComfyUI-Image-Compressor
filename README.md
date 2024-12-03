@@ -4,7 +4,8 @@
 
 一个用于图像压缩的ComfyUI自定义节点，支持多种压缩格式和参数调整。
 
-![image](workflow/screenshot.png)
+![image](workflow.png)
+
 > 直接拖入ComfyUI
 
 ## 功能特点
