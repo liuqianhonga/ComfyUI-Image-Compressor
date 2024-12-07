@@ -95,26 +95,6 @@ class BaseImageCompressor:
         
         return params
 
-    def convert_to_tensor(self, img, original_shape, device):
-        """Convert PIL Image back to tensor with proper alpha channel handling"""
-        if img.mode == 'RGBA':
-            compressed_array = np.array(img).astype(np.float32) / 255.0
-        else:
-            # 如果原图有 alpha 通道但压缩后没有（比如 JPEG），使用 RGB 模式
-            if len(original_shape) > 2 and original_shape[-1] == 4:
-                rgb_img = img.convert('RGB')
-                compressed_array = np.array(rgb_img).astype(np.float32) / 255.0
-            else:
-                compressed_array = np.array(img.convert('RGB')).astype(np.float32) / 255.0
-                if len(compressed_array.shape) == 2:
-                    compressed_array = np.stack([compressed_array] * 3, axis=-1)
-
-        # 处理批处理维度
-        if len(original_shape) == 4:
-            compressed_array = np.expand_dims(compressed_array, 0)
-
-        return torch.from_numpy(compressed_array).to(device) 
-
     def preprocess_input(self, input_image):
         """Preprocess input array to handle special shapes and channel order"""
         # Handle special (1, 1, C) shape
