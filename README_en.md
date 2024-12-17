@@ -15,6 +15,9 @@ A ComfyUI custom node for image compression, supporting multiple formats and adj
 - Support image resizing
 - Custom output path and filename prefix
 - Display file size before and after compression
+- Support batch image processing
+- Automatic transparency handling
+- Smart handling of various input formats (RGB/RGBA)
 
 ## Installation
 
@@ -29,16 +32,21 @@ A ComfyUI custom node for image compression, supporting multiple formats and adj
 ### Image Compressor Node
 
 #### Input Parameters
-- **image**: Input image
+- **images**: Input image(s) (supports single or batch images)
+- **format**: Output format selection (PNG/WEBP/JPEG)
+- **quality**: Compression quality (1-100)
+- **resize_factor**: Size adjustment factor (0.1-1.0)
+- **compression_level**: Compression level (0-9, PNG only)
 - **save_image**: Whether to save the compressed image file (Default: Yes)
 - **output_prefix**: Output filename prefix (Default: compressed_)
 - **output_path**: Custom output path (Optional, defaults to ComfyUI's output/compressed directory)
 
 #### Output Information
-- Compressed image
-- Compressed file size
-- Original file size
-- Save path (if saving is enabled)
+- **compression_info**: Compression information string, including:
+  - Compressed file size
+  - Original file size
+  - Save path (if saving is enabled)
+  - Compression ratio information
 
 ### Batch Image Compressor Node
 
@@ -47,6 +55,10 @@ A ComfyUI custom node for image compression, supporting multiple formats and adj
   - Processes all image files in the directory
   - Automatically recognizes PNG, JPEG, WEBP formats
   - Recursively processes images in subdirectories
+- **format**: Output format selection (PNG/WEBP/JPEG)
+- **quality**: Compression quality (1-100)
+- **resize_factor**: Size adjustment factor (0.1-1.0)
+- **compression_level**: Compression level (0-9, PNG only)
 - **save_image**: Whether to save the compressed image files (Default: Yes)
 - **output_prefix**: Output filename prefix (Default: compressed_)
 - **output_path**: Custom output path (Optional)
@@ -62,16 +74,19 @@ A ComfyUI custom node for image compression, supporting multiple formats and adj
   - Pros: Lossless compression, supports transparency
   - Cons: Relatively larger file size
   - Use cases: Icons, screenshots, images requiring perfect quality
+  - Features: Uses compression_level parameter to control compression strength
 
 - **WEBP**: Modern image format developed by Google
-  - Pros: Good compression ratio, supports both lossy and lossless compression
+  - Pros: Good compression ratio, supports both lossy and lossless compression, transparency support
   - Cons: Compatibility might not be as good as PNG and JPEG
   - Use cases: Web images, scenarios requiring balance between quality and size
+  - Features: Supports both quality and alpha_quality parameters
 
 - **JPEG**: Common lossy compression format
   - Pros: High compression ratio, small file size
-  - Cons: Lossy compression, no transparency support
+  - Cons: Lossy compression, no transparency support (transparent areas converted to white background)
   - Use cases: Photos, images not requiring transparency
+  - Features: Uses quality parameter and optimized subsampling settings
 
 #### Quality Control
 - **quality**: Compression quality (1-100, Default: 85)
