@@ -24,8 +24,8 @@
 1. 将本插件复制到 ComfyUI 的 `custom_nodes` 目录下
 2. 重启 ComfyUI
 3. 在节点列表中找到压缩节点:
-   - 路径: image/processing/Image Compressor (单图压缩节点)
-   - 路径: image/processing/Batch Image Compressor (批量压缩节点)
+   - 路径: image/Image Compressor (单图压缩节点)
+   - 路径: image/Batch Image Compressor (批量压缩节点)
 
 ## 节点类型
 

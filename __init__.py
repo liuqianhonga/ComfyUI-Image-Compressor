@@ -7,6 +7,6 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "ImageCompressor": "Image Compressor",
-    "BatchImageCompressor": "Batch Image Compressor"
+    "ImageCompressor": "🐟Image Compressor",
+    "BatchImageCompressor": "🐟Batch Image Compressor"
 }

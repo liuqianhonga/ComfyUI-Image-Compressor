@@ -20,7 +20,7 @@ class ImageCompressorNode(BaseImageCompressor):
     RETURN_NAMES = ("compression_info",)
     OUTPUT_NODE = True
     FUNCTION = "compress_image"
-    CATEGORY = "image/processing"
+    CATEGORY = "image"
 
     def compress_image(self, images, format, quality=85, resize_factor=1.0,
                       compression_level=6, save_image=True, output_prefix="compressed_",

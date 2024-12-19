@@ -19,7 +19,7 @@ class BatchImageCompressorNode(BaseImageCompressor):
     RETURN_NAMES = ("processed_files", "save_path",)
     OUTPUT_NODE = True
     FUNCTION = "compress_images"
-    CATEGORY = "image/processing"
+    CATEGORY = "image"
 
     def compress_images(self, input_path, format, quality, resize_factor, compression_level,
                        save_image, output_prefix, output_path=""):
