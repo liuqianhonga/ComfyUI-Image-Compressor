@@ -58,6 +58,14 @@ class BaseImageCompressor:
         size_str = f"{size / (1024 * 1024):.2f}MB" if size >= 1024 * 1024 else f"{size / 1024:.2f}KB"
         return buffer, size_str
 
+    def get_original_size(self, img):
+        """Get original image size in a standardized format"""
+        buffer = io.BytesIO()
+        img.save(buffer, format='PNG')
+        size = buffer.tell()
+        size_str = f"{size / (1024 * 1024):.2f}MB" if size >= 1024 * 1024 else f"{size / 1024:.2f}KB"
+        return size_str
+
     @staticmethod
     def get_compression_params():
         """Get common compression parameters"""

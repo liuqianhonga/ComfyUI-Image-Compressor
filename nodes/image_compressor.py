@@ -52,10 +52,7 @@ class ImageCompressorNode(BaseImageCompressor):
                 img = Image.fromarray((input_image * 255).astype(np.uint8), 'RGB')
 
             # Get original size info
-            original_buffer = io.BytesIO()
-            img.save(original_buffer, format='PNG')
-            original_size = original_buffer.tell()
-            original_size_str = f"{original_size / (1024 * 1024):.2f}MB" if original_size >= 1024 * 1024 else f"{original_size / 1024:.2f}KB"
+            original_size_str = self.get_original_size(img)
             original_sizes.append(original_size_str)
 
             # Get save options from base class

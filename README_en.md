@@ -76,8 +76,11 @@ A ComfyUI custom node for image compression, supporting multiple formats and adj
   - Empty: Defaults to output/compressed directory
 
 #### Output Information
-- Processing result summary, including status for each file
-- Output directory path
+- **compression_info**: Compression information string, including:
+  - Compressed file size
+  - Original file size
+  - Save path (if saving is enabled)
+  - Compression ratio information
 
 ### Common Compression Parameters
 
