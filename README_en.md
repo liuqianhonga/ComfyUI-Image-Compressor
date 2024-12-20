@@ -39,7 +39,13 @@ A ComfyUI custom node for image compression, supporting multiple formats and adj
 - **compression_level**: Compression level (0-9, PNG only)
 - **save_image**: Whether to save the compressed image file (Default: Yes)
 - **output_prefix**: Output filename prefix (Default: compressed_)
-- **output_path**: Custom output path (Optional, defaults to ComfyUI's output/compressed directory)
+- **output_path**: Custom output path
+  - Absolute path: Used directly
+    - Example: `D:/my_images/compressed`
+  - Relative path: Based on ComfyUI's output directory
+    - Example: `my_folder` → `output/my_folder`
+    - Example: `compressed/png` → `output/compressed/png`
+  - Empty: Defaults to output/compressed directory
 
 #### Output Information
 - **compression_info**: Compression information string, including:
@@ -61,7 +67,13 @@ A ComfyUI custom node for image compression, supporting multiple formats and adj
 - **compression_level**: Compression level (0-9, PNG only)
 - **save_image**: Whether to save the compressed image files (Default: Yes)
 - **output_prefix**: Output filename prefix (Default: compressed_)
-- **output_path**: Custom output path (Optional)
+- **output_path**: Custom output path
+  - Absolute path: Used directly
+    - Example: `D:/my_images/compressed`
+  - Relative path: Based on ComfyUI's output directory
+    - Example: `my_folder` → `output/my_folder`
+    - Example: `compressed/png` → `output/compressed/png`
+  - Empty: Defaults to output/compressed directory
 
 #### Output Information
 - Processing result summary, including status for each file

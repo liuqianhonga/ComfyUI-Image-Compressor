@@ -39,7 +39,13 @@
 - **compression_level**: 压缩级别（0-9，仅PNG格式有效）
 - **save_image**: 是否保存压缩后的图像文件（默认：是）
 - **output_prefix**: 输出文件名前缀（默认：compressed_）
-- **output_path**: 自定义输出路径（可选，默认使用 ComfyUI 的 output/compressed 目录）
+- **output_path**: 自定义输出路径
+  - 绝对路径：直接使用该路径
+    - 例如：`D:/my_images/compressed`
+  - 相对路径：基于 ComfyUI 的 output 目录
+    - 例如：`my_folder` → `output/my_folder`
+    - 例如：`compressed/png` → `output/compressed/png`
+  - 留空：默认使用 output/compressed 目录
 
 #### 输出信息
 - **compression_info**: 压缩信息字符串，包含:
@@ -57,7 +63,13 @@
   - 会递归处理子目录中的图像
 - **save_image**: 是否保存压缩后的图像文件（默认：是）
 - **output_prefix**: 输出文件名前缀（默认：compressed_）
-- **output_path**: 自定义输出路径（可选）
+- **output_path**: 自定义输出路径
+  - 绝对路径：直接使用该路径
+    - 例如：`D:/my_images/compressed`
+  - 相对路径：基于 ComfyUI 的 output 目录
+    - 例如：`my_folder` → `output/my_folder`
+    - 例如：`compressed/png` → `output/compressed/png`
+  - 留空：默认使用 output/compressed 目录
 
 #### 输出信息
 - 处理结果摘要，包含每个文件的处理状态

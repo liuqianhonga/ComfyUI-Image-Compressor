@@ -15,7 +15,10 @@ class BaseImageCompressor:
 
     def setup_output_path(self, output_path=""):
         """Setup output directory"""
-        self.output_dir = output_path or os.path.join(self.base_output_dir, 'compressed')
+        if output_path and os.path.isabs(output_path):
+            self.output_dir = output_path
+        else:
+            self.output_dir = os.path.join(self.base_output_dir, output_path.strip('/\\') or 'compressed')
         os.makedirs(self.output_dir, exist_ok=True)
 
     def get_save_options(self, format, quality, compression_level):
