@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-image-compressor"
+description = "A ComfyUI custom node for image compression that supports multiple compression formats and parameter adjustments."
+version = "1.0.0"
+license = {file = "LICENSE"}
+dependencies = ["Pillow>=10.0.0", "numpy>=1.24.0", "torch>=2.0.0"]
+
+[project.urls]
+Repository = "https://github.com/liuqianhonga/ComfyUI-Image-Compressor"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-Image-Compressor"
+Icon = ""
