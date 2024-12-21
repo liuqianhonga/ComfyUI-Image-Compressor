@@ -10,6 +10,6 @@ Repository = "https://github.com/liuqianhonga/ComfyUI-Image-Compressor"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = ""
+PublisherId = "liuqianhong"
 DisplayName = "ComfyUI-Image-Compressor"
-Icon = ""
+Icon = "🐟"
