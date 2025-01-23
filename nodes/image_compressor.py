@@ -5,6 +5,7 @@ from PIL import Image
 import io
 import os
 from datetime import datetime
+import random
 
 class ImageCompressorNode(BaseImageCompressor):
     """Node for compressing images in ComfyUI"""
@@ -38,7 +39,7 @@ class ImageCompressorNode(BaseImageCompressor):
             base_path = os.path.abspath(self.base_output_dir)
             output_path = os.path.abspath(self.output_dir)
             is_within_comfyui = output_path.startswith(base_path)
-        except:
+        except Exception as e:
             is_within_comfyui = False
         
         # Process each image in the batch
@@ -74,7 +75,9 @@ class ImageCompressorNode(BaseImageCompressor):
             compressed_sizes.append(size_str)
             
             # Handle file saving and UI info
-            filename = f"{output_prefix}{datetime.now().strftime('%Y%m%d_%H%M%S')}_{self.counter:04d}.{format.lower()}"
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')  # Add milliseconds
+            random_suffix = random.randint(1000, 9999)  # 4-digit random number
+            filename = f"{output_prefix}{timestamp}_{self.counter:04d}_{random_suffix}.{format.lower()}"
             save_path = os.path.join(self.output_dir, filename)
             
             if save_image:
@@ -100,9 +103,6 @@ class ImageCompressorNode(BaseImageCompressor):
             info_lines.append(f"{path}: {orig} -> {comp}")
         compression_info = "Compression results:\n\n" + "\n".join(info_lines)
         
-        print(f"Compression info: {compression_info}")
-
-
         # Only include UI images if within ComfyUI output directory
         result = {"result": (compression_info,)}
         if is_within_comfyui and ui_images:
