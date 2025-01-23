@@ -33,6 +33,14 @@ class ImageCompressorNode(BaseImageCompressor):
         original_sizes = []
         save_paths = []
         
+        # Check if output path is within ComfyUI output directory
+        try:
+            base_path = os.path.abspath(self.base_output_dir)
+            output_path = os.path.abspath(self.output_dir)
+            is_within_comfyui = output_path.startswith(base_path)
+        except:
+            is_within_comfyui = False
+        
         # Process each image in the batch
         for batch_number, img_tensor in enumerate(images):
             # Convert input tensor to numpy array
@@ -75,11 +83,13 @@ class ImageCompressorNode(BaseImageCompressor):
                     f.write(buffer.getvalue())
                 self.counter += 1
                 save_path_str = f"{save_path}"
-                ui_images.append({
-                    "filename": filename,
-                    "subfolder": self.output_dir,
-                    "type": 'output'
-                })
+                # Only add to UI images if within ComfyUI output directory
+                if is_within_comfyui:
+                    ui_images.append({
+                        "filename": filename,
+                        "subfolder": self.output_dir,
+                        "type": 'output'
+                    })
             else:
                 save_path_str = "File not saved"
             save_paths.append(save_path_str)
@@ -90,7 +100,11 @@ class ImageCompressorNode(BaseImageCompressor):
             info_lines.append(f"{path}: {orig} -> {comp}")
         compression_info = "Compression results:\n\n" + "\n".join(info_lines)
         
-        return {
-            "result": (compression_info,),
-            "ui": {"images": ui_images}
-        }
+        print(f"Compression info: {compression_info}")
+
+
+        # Only include UI images if within ComfyUI output directory
+        result = {"result": (compression_info,)}
+        if is_within_comfyui and ui_images:
+            result["ui"] = {"images": ui_images}
+        return result
