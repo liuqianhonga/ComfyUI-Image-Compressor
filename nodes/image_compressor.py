@@ -17,8 +17,8 @@ class ImageCompressorNode(BaseImageCompressor):
         
         return params
 
-    RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("compression_info",)
+    RETURN_TYPES = ("STRING", "IMAGE")
+    RETURN_NAMES = ("compression_info", "images")
     OUTPUT_NODE = True
     FUNCTION = "compress_image"
     CATEGORY = "image"
@@ -33,6 +33,7 @@ class ImageCompressorNode(BaseImageCompressor):
         compressed_sizes = []
         original_sizes = []
         save_paths = []
+        compressed_images = []
         
         # Check if output path is within ComfyUI output directory
         try:
@@ -103,8 +104,34 @@ class ImageCompressorNode(BaseImageCompressor):
             info_lines.append(f"{path}: {orig} -> {comp}")
         compression_info = "Compression results:\n\n" + "\n".join(info_lines)
         
+        # Load the compressed image from buffer
+        buffer.seek(0)
+        compressed_img = Image.open(buffer)
+        compressed_img.load() # Make sure the image is fully loaded
+        
+        # Convert compressed image to tensor for output
+        if compressed_img.mode == 'RGBA':
+            img_np = np.array(compressed_img).astype(np.float32) / 255.0
+        else:
+            # 如果原图有 alpha 通道但压缩后没有（比如 JPEG），使用 RGB 模式
+            if len(img_tensor.shape) > 2 and img_tensor.shape[-1] == 4:
+                rgb_img = compressed_img.convert('RGB')
+                img_np = np.array(rgb_img).astype(np.float32) / 255.0
+            else:
+                img_np = np.array(compressed_img.convert('RGB')).astype(np.float32) / 255.0
+                if len(img_np.shape) == 2:
+                    img_np = np.stack([img_np] * 3, axis=-1)
+
+        if len(img_tensor.shape) == 4:
+            img_np = np.expand_dims(img_np, 0)
+
+        # Convert numpy array to torch tensor for ComfyUI compatibility
+        img_to_tensor = torch.from_numpy(img_np).to(img_tensor.device)
+        # Add processed image to list
+        compressed_images.append(img_to_tensor)
+
         # Only include UI images if within ComfyUI output directory
-        result = {"result": (compression_info,)}
+        result = {"result": (compression_info, compressed_images)}
         if is_within_comfyui and ui_images:
             result["ui"] = {"images": ui_images}
         return result

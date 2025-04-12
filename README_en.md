@@ -53,6 +53,10 @@ A ComfyUI custom node for image compression, supporting multiple formats and adj
   - Original file size
   - Save path (if saving is enabled)
   - Compression ratio information
+- **images**: Compressed images
+  - Can be directly connected to other nodes requiring image input
+  - Maintains the original batch structure
+  - Contains all processed image data after compression
 
 ### Batch Image Compressor Node
 
