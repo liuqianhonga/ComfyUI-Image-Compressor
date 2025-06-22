@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-image-compressor"
 description = "A ComfyUI custom node for image compression that supports multiple compression formats and parameter adjustments."
-version = "2.0.0"
+version = "2.1.0"
 license = {file = "LICENSE"}
 dependencies = ["Pillow>=10.0.0", "numpy>=1.24.0", "torch>=2.0.0"]
 

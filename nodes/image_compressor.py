@@ -30,10 +30,8 @@ class ImageCompressorNode(BaseImageCompressor):
         self.setup_output_path(output_path)
         
         ui_images = []
-        compressed_sizes = []
-        original_sizes = []
-        save_paths = []
         compressed_images = []
+        compressed_infos = []
         
         # Check if output path is within ComfyUI output directory
         try:
@@ -63,7 +61,6 @@ class ImageCompressorNode(BaseImageCompressor):
 
             # Get original size info
             original_size_str = self.get_original_size(img)
-            original_sizes.append(original_size_str)
 
             # Get save options from base class
             save_options = self.get_save_options(format, quality, compression_level)
@@ -73,7 +70,6 @@ class ImageCompressorNode(BaseImageCompressor):
             
             # Save to buffer and get size info
             buffer, size_str = self.save_image_to_buffer(img, format, save_options)
-            compressed_sizes.append(size_str)
             
             # Handle file saving and UI info
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')  # Add milliseconds
@@ -96,42 +92,38 @@ class ImageCompressorNode(BaseImageCompressor):
                     })
             else:
                 save_path_str = "File not saved"
-            save_paths.append(save_path_str)
-        
-        # For batch processing, we'll join the size and path information with newlines
-        info_lines = []
-        for path, orig, comp in zip(save_paths, original_sizes, compressed_sizes):
-            info_lines.append(f"{path}: {orig} -> {comp}")
-        compression_info = "Compression results:\n\n" + "\n".join(info_lines)
-        
-        # Load the compressed image from buffer
-        buffer.seek(0)
-        compressed_img = Image.open(buffer)
-        compressed_img.load() # Make sure the image is fully loaded
-        
-        # Convert compressed image to tensor for output
-        if compressed_img.mode == 'RGBA':
-            img_np = np.array(compressed_img).astype(np.float32) / 255.0
-        else:
-            # 如果原图有 alpha 通道但压缩后没有（比如 JPEG），使用 RGB 模式
-            if len(img_tensor.shape) > 2 and img_tensor.shape[-1] == 4:
-                rgb_img = compressed_img.convert('RGB')
-                img_np = np.array(rgb_img).astype(np.float32) / 255.0
+            
+            # Load the compressed image from buffer
+            buffer.seek(0)
+            compressed_img = Image.open(buffer)
+            compressed_img.load() # Make sure the image is fully loaded
+            
+            # Convert compressed image to tensor for output
+            if compressed_img.mode == 'RGBA':
+                img_np = np.array(compressed_img).astype(np.float32) / 255.0
             else:
-                img_np = np.array(compressed_img.convert('RGB')).astype(np.float32) / 255.0
-                if len(img_np.shape) == 2:
-                    img_np = np.stack([img_np] * 3, axis=-1)
+                # 如果原图有 alpha 通道但压缩后没有（比如 JPEG），使用 RGB 模式
+                if len(img_tensor.shape) > 2 and img_tensor.shape[-1] == 4:
+                    rgb_img = compressed_img.convert('RGB')
+                    img_np = np.array(rgb_img).astype(np.float32) / 255.0
+                else:
+                    img_np = np.array(compressed_img.convert('RGB')).astype(np.float32) / 255.0
+                    if len(img_np.shape) == 2:
+                        img_np = np.stack([img_np] * 3, axis=-1)
 
-        if len(img_tensor.shape) == 4:
-            img_np = np.expand_dims(img_np, 0)
+            if len(img_tensor.shape) == 4:
+                img_np = np.expand_dims(img_np, 0)
 
-        # Convert numpy array to torch tensor for ComfyUI compatibility
-        img_to_tensor = torch.from_numpy(img_np).to(img_tensor.device)
-        # Add processed image to list
-        compressed_images.append(img_to_tensor)
-
+            # Convert numpy array to torch tensor for ComfyUI compatibility
+            img_to_tensor = torch.from_numpy(img_np).to(img_tensor.device)
+            # Add processed image to list
+            compressed_images.append(img_to_tensor)
+            
+            # Collect compression info
+            compressed_infos.append(f"{save_path_str}: {original_size_str} -> {size_str}")
+        
         # Only include UI images if within ComfyUI output directory
-        result = {"result": (compression_info, compressed_images)}
+        result = {"result": ("Compression results:\n\n" + "\n".join(compressed_infos), compressed_images)}
         if is_within_comfyui and ui_images:
             result["ui"] = {"images": ui_images}
         return result
